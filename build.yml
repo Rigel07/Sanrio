@@ -1,23 +1,56 @@
-name: build
-on: [push, pull_request, workflow_dispatch]
+```yaml
+name: Build Mod
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
 jobs:
   build:
+    name: Build Sanrio Mod
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: 17
-      - uses: actions/setup-python@v5
+          java-version: "17"
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
-      - run: pip install pillow
-      - uses: gradle/actions/setup-gradle@v3
+          python-version: "3.12"
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pillow numpy
+
+      - name: Install FFmpeg
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
         with:
-          gradle-version: 8.1.1
-      - run: gradle build --no-daemon
-      - uses: actions/upload-artifact@v4
+          gradle-version: "8.8"
+
+      - name: Build mod
+        run: gradle build --no-daemon
+
+      - name: Upload mod JAR
+        uses: actions/upload-artifact@v4
         with:
-          name: achilles-jar
+          name: Sanrio-Mod
           path: build/libs/*.jar
+          if-no-files-found: error
+```
